@@ -1,0 +1,13 @@
+- login in
+- input secret
+- save secret
+- show the secret
+- pass through the secret guard
+- sync the secrets to cloud
+- list recent secrets
+- search secrets
+- generate secret automatically
+- add the secret guard
+- freeze the account or secret
+- turn off the frozen
+- priority and secrets, the most important secrets should not be list or searched by keyword

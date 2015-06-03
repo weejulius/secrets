@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="background">#F9F9F9</color>
+    <color name="primary">#3797C7</color>
+    <color name="primary_dark">#313131</color>
+    <color name="accent">#3797C7</color>
+    <color name="actionbar_background">#3D3D3D</color>
+    <color name="level_normal">#1892e7</color>
+    <color name="level_important">#e71870</color>
+    <color name="level_private">#e77518</color>
+</resources>
