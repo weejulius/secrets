@@ -10,7 +10,7 @@ public class DBTest {
     public void clickingButton_shouldChangeResultsViewText() throws Exception {
 
 
-        Schema schema = new Schema(4, "jyu.secret.model");
+        Schema schema = new Schema(5, "jyu.secret.model");
         Entity entity = schema.addEntity("Secret");
 
         entity.addLongProperty("id").index().primaryKey().autoincrement().unique();
@@ -27,6 +27,7 @@ public class DBTest {
 
         entity2.addLongProperty("id").index().primaryKey().autoincrement().unique();
         entity2.addStringProperty("name").index().unique();
+        entity2.addStringProperty("rnd");
         entity2.addStringProperty("pwd");
         entity2.addDateProperty("createdDate");
         entity2.addDateProperty("updatedDate");

@@ -1,11 +1,14 @@
 package jyu.secret;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,9 +43,11 @@ public class InputSecretActivity extends ActionBarActivity implements Toolbar.On
 
     private boolean pwdToggled = false;//是否切换到密码输入
 
-    private Secret secret;
+    private Long secretId;
 
     private int level;//帐号级别
+
+    private EditText pwdConfirmET;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +64,10 @@ public class InputSecretActivity extends ActionBarActivity implements Toolbar.On
 
         setSupportActionBar(toolbar);
 
-        final Long secretId = getIntent().getLongExtra("SECRET_ID", 0l);
+        secretId = getIntent().getLongExtra("SECRET_ID", 0l);
 
-        secret = DBSession.ins(this).getSecretDao().load(secretId);
+        Secret secret = DBSession.ins(this).getSecretDao().load(secretId);
+
 
         nameTV = (TextView) findViewById(R.id.input_name);
         switchBtn = (Button) findViewById(R.id.switcher);
@@ -70,9 +76,10 @@ public class InputSecretActivity extends ActionBarActivity implements Toolbar.On
         titleEV = (EditText) findViewById(R.id.et_title);
 
         if (secret != null) {
+
+            Encrypts.ins().decryptSecret(secret);
             titleEV.setText(secret.getTitle());
             nameEV.setText(secret.getName());
-            pwdEV.setText(secret.getPwd());
         }
 
 
@@ -116,7 +123,6 @@ public class InputSecretActivity extends ActionBarActivity implements Toolbar.On
         });
 
 
-
     }
 
 
@@ -150,13 +156,15 @@ public class InputSecretActivity extends ActionBarActivity implements Toolbar.On
 
     /**
      * 保存secret
+     *
+     * @param userPwd
      */
-    private void saveSecret() {
+    private void saveSecret(String userPwd) {
 
-        Secret secretToUpdated = secret;
+        Secret secret = null;
         final String title = titleEV.getText().toString();
 
-        if (secretToUpdated == null) {
+        if (secretId <= 0) {
 
             List<Secret> secrets = SessionManager.ins().querySecretByTitle(this, title);
 
@@ -165,8 +173,8 @@ public class InputSecretActivity extends ActionBarActivity implements Toolbar.On
                 return;
             }
 
-            secretToUpdated = new Secret();
-            secretToUpdated.setCreatedDate(new Date());
+            secret = new Secret();
+            secret.setCreatedDate(new Date());
 
         }
 
@@ -174,18 +182,26 @@ public class InputSecretActivity extends ActionBarActivity implements Toolbar.On
         final String name = nameEV.getText().toString();
         final String pwd = pwdEV.getText().toString();
 
-        secretToUpdated.setUpdatedDate(new Date());
-        secretToUpdated.setTitle(title);
-        secretToUpdated.setName(name);
-        secretToUpdated.setPwd(pwd);
-        secretToUpdated.setLevel((long)level);
-        secretToUpdated.setUserId(1l);
+        boolean isCorrect = SessionManager.ins().confirmPwd(this, userPwd);
 
-        Long sId = DBSession.ins(this).getSecretDao().insertOrReplace(secretToUpdated);
+        if (!isCorrect) {
+            Toast.makeText(this, "密码错误", Toast.LENGTH_SHORT).show();
 
-        secretToUpdated.setId(sId);
+        }
 
-        secret = secretToUpdated;
+        secret.setUpdatedDate(new Date());
+        secret.setTitle(title);
+        secret.setName(name);
+        secret.setPwd(pwd);
+        secret.setLevel((long) level);
+        secret.setUserId(SessionManager.ins().getUserId());
+
+        Encrypts.ins().encryptSecret(userPwd, secret);
+
+        Long sId = DBSession.ins(this).getSecretDao().insertOrReplace(secret);
+
+        secretId = sId;
+
 
         Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
 
@@ -219,7 +235,7 @@ public class InputSecretActivity extends ActionBarActivity implements Toolbar.On
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {
         if (menuItem.getItemId() == R.id.m_save) {
-            saveSecret();
+            popupPwdDialog();
             return true;
         }
 
@@ -234,6 +250,29 @@ public class InputSecretActivity extends ActionBarActivity implements Toolbar.On
 
         return true;
     }
+
+
+    private void popupPwdDialog() {
+
+        pwdConfirmET = new EditText(this);
+        pwdConfirmET.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(this).setTitle("输入密码").setView(pwdConfirmET);
+
+        alert.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                saveSecret(pwdConfirmET.getText().toString());
+            }
+        });
+        alert.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alertDialog = alert.create();
+        alertDialog.show();
+    }
+
 
     public void selectLevel(View view) {
 

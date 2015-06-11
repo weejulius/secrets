@@ -25,9 +25,10 @@ public class UserDao extends AbstractDao<User, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "ID");
         public final static Property Name = new Property(1, String.class, "name", false, "NAME");
-        public final static Property Pwd = new Property(2, String.class, "pwd", false, "PWD");
-        public final static Property CreatedDate = new Property(3, java.util.Date.class, "createdDate", false, "CREATED_DATE");
-        public final static Property UpdatedDate = new Property(4, java.util.Date.class, "updatedDate", false, "UPDATED_DATE");
+        public final static Property Rnd = new Property(2, String.class, "rnd", false, "RND");
+        public final static Property Pwd = new Property(3, String.class, "pwd", false, "PWD");
+        public final static Property CreatedDate = new Property(4, java.util.Date.class, "createdDate", false, "CREATED_DATE");
+        public final static Property UpdatedDate = new Property(5, java.util.Date.class, "updatedDate", false, "UPDATED_DATE");
     };
 
 
@@ -45,9 +46,10 @@ public class UserDao extends AbstractDao<User, Long> {
         db.execSQL("CREATE TABLE " + constraint + "'USER' (" + //
                 "'ID' INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE ," + // 0: id
                 "'NAME' TEXT UNIQUE ," + // 1: name
-                "'PWD' TEXT," + // 2: pwd
-                "'CREATED_DATE' INTEGER," + // 3: createdDate
-                "'UPDATED_DATE' INTEGER);"); // 4: updatedDate
+                "'RND' TEXT," + // 2: rnd
+                "'PWD' TEXT," + // 3: pwd
+                "'CREATED_DATE' INTEGER," + // 4: createdDate
+                "'UPDATED_DATE' INTEGER);"); // 5: updatedDate
         // Add Indexes
         db.execSQL("CREATE INDEX " + constraint + "IDX_USER_ID ON USER" +
                 " (ID);");
@@ -76,19 +78,24 @@ public class UserDao extends AbstractDao<User, Long> {
             stmt.bindString(2, name);
         }
  
+        String rnd = entity.getRnd();
+        if (rnd != null) {
+            stmt.bindString(3, rnd);
+        }
+ 
         String pwd = entity.getPwd();
         if (pwd != null) {
-            stmt.bindString(3, pwd);
+            stmt.bindString(4, pwd);
         }
  
         java.util.Date createdDate = entity.getCreatedDate();
         if (createdDate != null) {
-            stmt.bindLong(4, createdDate.getTime());
+            stmt.bindLong(5, createdDate.getTime());
         }
  
         java.util.Date updatedDate = entity.getUpdatedDate();
         if (updatedDate != null) {
-            stmt.bindLong(5, updatedDate.getTime());
+            stmt.bindLong(6, updatedDate.getTime());
         }
     }
 
@@ -104,9 +111,10 @@ public class UserDao extends AbstractDao<User, Long> {
         User entity = new User( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // name
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // pwd
-            cursor.isNull(offset + 3) ? null : new java.util.Date(cursor.getLong(offset + 3)), // createdDate
-            cursor.isNull(offset + 4) ? null : new java.util.Date(cursor.getLong(offset + 4)) // updatedDate
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // rnd
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // pwd
+            cursor.isNull(offset + 4) ? null : new java.util.Date(cursor.getLong(offset + 4)), // createdDate
+            cursor.isNull(offset + 5) ? null : new java.util.Date(cursor.getLong(offset + 5)) // updatedDate
         );
         return entity;
     }
@@ -116,9 +124,10 @@ public class UserDao extends AbstractDao<User, Long> {
     public void readEntity(Cursor cursor, User entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setPwd(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setCreatedDate(cursor.isNull(offset + 3) ? null : new java.util.Date(cursor.getLong(offset + 3)));
-        entity.setUpdatedDate(cursor.isNull(offset + 4) ? null : new java.util.Date(cursor.getLong(offset + 4)));
+        entity.setRnd(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setPwd(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setCreatedDate(cursor.isNull(offset + 4) ? null : new java.util.Date(cursor.getLong(offset + 4)));
+        entity.setUpdatedDate(cursor.isNull(offset + 5) ? null : new java.util.Date(cursor.getLong(offset + 5)));
      }
     
     /** @inheritdoc */

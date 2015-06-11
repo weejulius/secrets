@@ -16,6 +16,8 @@ public class SessionManager {
 
     private final static SessionManager ins = new SessionManager();
 
+    private Encrypts encrypts = Encrypts.ins();
+
     private boolean isLogined;
     private String userName = "jyu";
     private Long userId = 0l;
@@ -43,12 +45,25 @@ public class SessionManager {
             return false;
         }
 
-        final List<User> users = DBSession.ins(context).getUserDao().queryRaw("where name=? and pwd=?", userName, pwd);
+        final List<User> users = DBSession.ins(context).getUserDao().queryRaw("where name=? ", userName);
 
         final boolean r = users != null && users.size() == 1;
 
         if (r) {
-            userId = users.get(0).getId();
+
+            final User user = users.get(0);
+
+            if (user.getPwd() == null || user.getRnd() == null) {
+                return false;
+            }
+
+            userId = user.getId();
+
+            encrypts.loadRandomKey(user.getRnd());
+            encrypts.genSeedForShortPwd(pwd.substring(pwd.length() - 4));
+            if (!confirmPwd(context,pwd)) {
+                return false;
+            }
         }
 
         isLogined = r;
@@ -69,7 +84,10 @@ public class SessionManager {
         u.setCreatedDate(new Date());
         u.setUpdatedDate(new Date());
         u.setName(userName);
-        u.setPwd(pwd);
+        u.setRnd(encrypts.genRandomKey());
+        encrypts.loadRandomKey(u.getRnd());
+
+        u.setPwd(encrypts.genSeedForShortPwd(pwd.substring(pwd.length()-4)));
 
 
         Long id = DBSession.ins(context).insertOrReplace(u);
@@ -94,6 +112,11 @@ public class SessionManager {
         this.userId = userId;
     }
 
+
+    public User getUser(Context ctx) {
+        return DBSession.ins(ctx).getUserDao().load(userId);
+    }
+
     public List<Secret> queryRecentSecrets(Context context) {
         if (userId == null) {
             return null;
@@ -114,5 +137,9 @@ public class SessionManager {
         final List<User> users = DBSession.ins(ctx).getUserDao().queryRaw("where name=?", userName);
 
         return users != null && !users.isEmpty();
+    }
+
+    public boolean confirmPwd(Context ctx, String userPwd) {
+        return encrypts.genSeedForShortPwd(userPwd.substring(userPwd.length()-4)).equals(getUser(ctx).getPwd());
     }
 }

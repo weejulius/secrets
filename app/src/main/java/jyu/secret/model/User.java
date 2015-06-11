@@ -8,6 +8,7 @@ public class User {
 
     private Long id;
     private String name;
+    private String rnd;
     private String pwd;
     private java.util.Date createdDate;
     private java.util.Date updatedDate;
@@ -19,9 +20,10 @@ public class User {
         this.id = id;
     }
 
-    public User(Long id, String name, String pwd, java.util.Date createdDate, java.util.Date updatedDate) {
+    public User(Long id, String name, String rnd, String pwd, java.util.Date createdDate, java.util.Date updatedDate) {
         this.id = id;
         this.name = name;
+        this.rnd = rnd;
         this.pwd = pwd;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
@@ -41,6 +43,14 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getRnd() {
+        return rnd;
+    }
+
+    public void setRnd(String rnd) {
+        this.rnd = rnd;
     }
 
     public String getPwd() {

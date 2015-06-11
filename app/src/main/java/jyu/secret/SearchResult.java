@@ -290,6 +290,9 @@ public class SearchResult extends ActionBarActivity {
             if (secret == null) {
                 return;
             }
+
+            Encrypts.ins().decryptSecret(secret);
+
             holder.titleTV.setText(secret.getTitle());
             holder.nameTV.setText(secret.getName());
             holder.secretId = secret.getId();

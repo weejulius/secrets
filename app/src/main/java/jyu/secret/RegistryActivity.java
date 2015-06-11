@@ -55,6 +55,7 @@ public class RegistryActivity extends ActionBarActivity {
         if (id == R.id.m_create) {
 
             SessionManager.ins().tryCreate(this, pwdET.getText().toString());
+            pwdET.setText("");
 
             if (SessionManager.ins().isLogined()) {
                 Intent i = new Intent(this, SearchResult.class);
